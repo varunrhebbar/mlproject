@@ -1,23 +1,17 @@
-name: FastAPI on Docker
-
+name: Fast API docker build push
 on:
   push:
-    branches:
-      - master
-
+    branches: [ master ]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - name: Build the FastAPI Docker image
+      run: docker build -t '${{secrets.DOCKER_LOGIN}}'/fastapi-docker-workflow:'${{github.sha}}' .
+      
+    - name: Login to docker
+      run: docker login --username '${{secrets.DOCKER_LOGIN}}' --password '${{secrets.DOCKER_PASSWORD}}'
 
-    - name: Build docker image from FastAPI
-      run: docker build -t ${{ secrets.Docker_username }}/fastapi-docker:${{ github.sha }} .
-
-    - name: Logging into Docker Hub
-      run: docker login --username ${{ secrets.Docker_username }} --password-stdin <<< ${{ secrets.Docker_password }}
-
-    - name: Push the image to Docker Hub
-      run: docker push ${{ secrets.Docker_username }}/fastapi-docker:${{ github.sha }}
+    - name: Push the docker image
+      run: docker push '${{secrets.DOCKER_LOGIN}}'/fastapi-docker-workflow:'${{github.sha}}'
